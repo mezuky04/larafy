@@ -3,6 +3,7 @@
 namespace Rennokki\Larafy\Traits;
 
 use Carbon\Carbon;
+use Rennokki\Larafy\Exceptions\ResourceNotFoundException;
 use Rennokki\Larafy\Exceptions\SpotifyAPIException;
 use Rennokki\Larafy\Exceptions\SpotifyAuthorizationException;
 
@@ -117,6 +118,10 @@ trait RequestTrait
                 ],
             ]);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
+            if ($e->getResponse()->getStatusCode() == 404) {
+                throw new ResourceNotFoundException('Spotify resource could not be found.');    
+            }
+
             throw new SpotifyAPIException('Spotify returned other than 200 OK.', json_decode($e->getResponse()->getBody()->getContents()));
         }
 
