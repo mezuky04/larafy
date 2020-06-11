@@ -6,6 +6,7 @@ use Carbon\Carbon;
 use Rennokki\Larafy\Exceptions\ResourceNotFoundException;
 use Rennokki\Larafy\Exceptions\SpotifyAPIException;
 use Rennokki\Larafy\Exceptions\SpotifyAuthorizationException;
+use Rennokki\Larafy\Exceptions\TooManyRequestsException;
 
 trait RequestTrait
 {
@@ -118,8 +119,14 @@ trait RequestTrait
                 ],
             ]);
         } catch (\GuzzleHttp\Exception\ClientException $e) {
-            if ($e->getResponse()->getStatusCode() == 404) {
+            $statusCode = $e->getResponse()->getStatusCode();
+
+            if ($statusCode == 404) {
                 throw new ResourceNotFoundException('Spotify resource could not be found.');    
+            }
+
+            if ($statusCode == 429) {
+                throw new TooManyRequestsException('Rate limit reached.', $e->getResponse()->getHeaderLine('Retry-After'));
             }
 
             throw new SpotifyAPIException('Spotify returned other than 200 OK: ' . $e->getResponse()->getStatusCode(), json_decode($e->getResponse()->getBody()->getContents()));
