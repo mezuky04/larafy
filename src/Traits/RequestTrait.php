@@ -122,7 +122,7 @@ trait RequestTrait
                 throw new ResourceNotFoundException('Spotify resource could not be found.');    
             }
 
-            throw new SpotifyAPIException('Spotify returned other than 200 OK.', json_decode($e->getResponse()->getBody()->getContents()));
+            throw new SpotifyAPIException('Spotify returned other than 200 OK: ' . $e->getResponse()->getStatusCode(), json_decode($e->getResponse()->getBody()->getContents()));
         }
 
         return json_decode($request->getBody());
